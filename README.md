@@ -19,8 +19,10 @@ Sample code for Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric 
 
 ## Installation
 Then install jax with the appropriate CPU or GPU support: [here](https://github.com/google/jax#installation)
+
 Install all additionaly required packages run:
 
 ```bash
  pip install -r requirements.txt
 ```
+
