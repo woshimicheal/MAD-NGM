@@ -126,26 +126,6 @@ def heat_loadData(file_load):
     return u0Mat,xx
 
 
-
-def Mad_LoadData(file_load,s =200 ):
-
-    data = loadmat(file_load)
-    xx = data['xx'][:,:-1]
-    tt = data['tspan']
-    Input = data['input']
-    Outpu = data['output']
-    sub = 2
-    xx_test = xx[:,::sub]
-    tt_test = tt[:,::2]
-    Input_test = Input[:-5,::sub]
-    Outpu_test = Outpu[:-5,::2,::sub]
-    xx_test = xx_test.flatten()[:,None]
-    xx1  =  xx_test[0]
-    xx2  =  xx_test[-1]
-    xx0  =  xx_test
-    u0Mat = Input_test
-    return u0Mat,xx0,xx1,xx2
-
 def Torch_jax_gai(path_torch,n=1):
 
     para_re = torch.load(path_torch)
@@ -170,33 +150,3 @@ def Torch_jax_gai(path_torch,n=1):
     initAZ_test = jnp.array(para_test)
     Latent_jax = jnp.array(para_re['Latents'].cpu().detach().numpy())
     return Latent_jax,initAZ_test
-
-def Torch_Jax(path_torch,model = None):
-
-    para_test = torch.load(path_torch)
-    concatenated_params_list = []
-    for i in range(2):
-        w_i = 'layers.layer_'+str(i)+'.weight'
-        b_i = 'layers.layer_'+str(i)+'.bias'
-        wi = para_test[w_i]
-        bi = para_test[b_i].reshape(-1,1)
-        concatenated_params_list.extend(torch.cat((wi,bi),dim=1).reshape(-1,1))
-    all_params = torch.cat(concatenated_params_list, dim=0).cpu().detach().numpy()
-    Latent_jax = jnp.array(para_test['Latents'].cpu().detach().numpy())
-    initAZ_test = jnp.array(all_params)
-
-    return Latent_jax,initAZ_test
-
-def Torch_Jaxww(path_torch):
-    para_test = torch.load(path_torch)
-    concatenated_params_list = []
-    for i in range(3):
-        w_i = 'layers.layer_'+str(i)+'.weight'
-        b_i = 'layers.layer_'+str(i)+'.bias'
-        wi = para_test[w_i]
-        bi = para_test[b_i].reshape(-1,1)
-        concatenated_params_list.extend(torch.cat((wi,bi),dim=1).reshape(-1,1))
-    all_params = torch.cat(concatenated_params_list, dim=0).cpu().detach().numpy()
-    initAZ_test = jnp.array(all_params)
-
-    return initAZ_test
