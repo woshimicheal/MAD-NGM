@@ -1,4 +1,4 @@
-# MAD-NG: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations
+# MAD-NGM: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations
 Sample code for Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations with Deep Networks
 
 
