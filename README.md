@@ -18,12 +18,37 @@ MAD-NGM/
 ```
 
 ## Installation
-Then install jax with the appropriate CPU or GPU support: [here](https://github.com/google/jax#installation)
 
-Install all additionaly required packages run:
+First, install JAX with the appropriate CPU or GPU support by following the instructions [here](https://github.com/google/jax#installation).
+
+Then install all additional required packages by running:
 
 ```bash
- pip install -r requirements.txt
+pip install -r requirements.txt
+```
+
+## Reproducing the Experiments
+Important: All commands below should be run from the root directory of the project.
+
+## Experiment 1: 
+To reproduce the full KdV workflow, run:
+```bash
+python kdv_mad_ngm.py --stage all
+```
+## Experiment 2: 
+To reproduce the full Burgers workflow, run:
+```bash
+python burgers_mad_ngm.py --stage all
+```
+## Experiment 3: 
+To reproduce the full 1D Allen--Cahn workflow, run:
+```bash
+python ac1d_mad_ngm.py --stage all
+```
+## Experiment 4: 
+To reproduce the full 2D Allen--Cahn workflow, run:
+```bash
+python ac2d_mad_ngm.py --stage all
 ```
 
 ## Citing this work
