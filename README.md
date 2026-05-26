@@ -50,6 +50,7 @@ To reproduce the full 2D Allen--Cahn workflow, run:
 ```bash
 python ac2d_mad_ngm.py --stage all
 ```
+The scripts use the demonstration datasets provided in the `Data/` directory and save the results to the corresponding subdirectories under `outputs/`.
 
 ## Citing this work
 Qiuqi Li, Yiting Liu, Jin Zhao, Wencan Zhu, "MAD-NGM: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations". arXiv preprint arXiv:2512.21633 (2025).
