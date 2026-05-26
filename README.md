@@ -15,6 +15,7 @@ MAD-NGM/
 ├── ac2d_mad_ngm.py          # Main script for solving the two-dimensional Allen--Cahn equation
 ├── requirements.txt         # Required Python packages
 └── README.md                # Project documentation
+```
 
 ## Installation
 Then install jax with the appropriate CPU or GPU support: [here](https://github.com/google/jax#installation)
@@ -26,7 +27,7 @@ Install all additionaly required packages run:
 ```
 
 ## Citing this work
-Qiuqi Li, Yiting Liu, Jin Zhao, Wencan Zhu, "MAD-NG: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations". arXiv preprint arXiv:2512.21633 (2025).
+Qiuqi Li, Yiting Liu, Jin Zhao, Wencan Zhu, "MAD-NGM: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations". arXiv preprint arXiv:2512.21633 (2025).
 
 ```bash
 @misc{li2025madngmetaautodecoderneuralgalerkin,
