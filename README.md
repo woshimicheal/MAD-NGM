@@ -56,13 +56,10 @@ The scripts use the demonstration datasets provided in the `Data/` directory and
 Qiuqi Li, Yiting Liu, Jin Zhao, Wencan Zhu, "MAD-NGM: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations". arXiv preprint arXiv:2512.21633 (2025).
 
 ```bash
-@misc{li2025madngmetaautodecoderneuralgalerkin,
-      title={MAD-NG: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations}, 
-      author={Qiuqi Li and Yiting Liu and Jin Zhao and Wencan Zhu},
-      year={2025},
-      eprint={2512.21633},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2512.21633}, 
+@article{li2025mad,
+  title={MAD-NG: Meta-Auto-Decoder Neural Galerkin Method for Solving Parametric Partial Differential Equations},
+  author={Li, Qiuqi and Liu, Yiting and Zhao, Jin and Zhu, Wencan},
+  journal={arXiv preprint arXiv:2512.21633},
+  year={2025}
 }
 ```
