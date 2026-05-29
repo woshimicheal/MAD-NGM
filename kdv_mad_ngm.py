@@ -165,6 +165,7 @@ def evaluate_mad_ngm(args: argparse.Namespace, parameter_path: Path) -> None:
     initial_error = jnp.mean(jnp.square(initial_prediction - output_test[args.test_index, 0]))
     print(f"Initial MSE before fine-tuning: {float(initial_error):.6e}")
 
+    start_time = time.perf_counter()
     latent = fine_tune_latent(
         ufun=ufun,
         y=input_define,
@@ -173,6 +174,8 @@ def evaluate_mad_ngm(args: argparse.Namespace, parameter_path: Path) -> None:
         max_iter=args.finetune_iterations,
         learning_rate=args.finetune_lr,
     )
+    total_time = time.perf_counter() - start_time
+    print(f"Fine-tuning runtime: {total_time / 60:.2f} min")
 
     fine_tuned_path = args.output_dir / f"kdv_finetuned_latent_index{args.test_index}.npz"
     jnp.savez(fine_tuned_path, Latent_jax=latent, initAZ_test=init_az)

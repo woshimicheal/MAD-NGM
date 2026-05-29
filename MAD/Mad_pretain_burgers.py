@@ -47,8 +47,10 @@ class MadNN():
             self.Latents_pretrain()
         else:
             self.Latents_Modefine(para_dict,Latent)
-        self.optimizer = torch.optim.LBFGS(self.net.parameters(),lr=0.01, max_iter=maxiter, max_eval=None, tolerance_grad=1e-30, tolerance_change=1e-30, history_size=10, line_search_fn=None)
-        self.optimizer_Adam = torch.optim.Adam(self.net.parameters())
+        if model == 'pretrain':
+            self.optimizer = torch.optim.LBFGS(self.net.parameters(),lr=0.01, max_iter=maxiter, max_eval=None, tolerance_grad=1e-30, tolerance_change=1e-30, history_size=10, line_search_fn=None)
+        else:
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=1e-2)            
         self.mse_loss = torch.nn.MSELoss()
         self.losslist=[]
         self.iter = 0
@@ -61,6 +63,18 @@ class MadNN():
         self.net = net.to(device)
 
     def Latents_pretrain(self):
+        """
+        预训练阶段初始化潜在变量和网络模型。
+
+        创建神经网络实例，初始化潜在变量(latents)为随机正态分布，
+        并将潜在变量注册为网络的可训练参数，最后将网络移至计算设备。
+
+        Args:
+            无
+
+        Returns:
+            无
+        """
         net = Net(self.layers)
         latents = torch.nn.Parameter(torch.randn(self.num_latents, self.latent_size).float())
         net.register_parameter('Latents', latents)

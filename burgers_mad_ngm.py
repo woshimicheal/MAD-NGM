@@ -259,7 +259,7 @@ def modefine_mad_ngm(
     while mad.iter < args.modefine_iterations:
         loss = mad.train()  
     elapsed_time = time.perf_counter() - start_time
-    print(f"elapsed={elapsed_time / 60:.2f} min")
+    print(f"Fine-tuning runtime: {elapsed_time / 60:.2f} min")
 
     model_path = Path(args.modefine_model) if args.modefine_model else default_finetuned_model_path(args)
     npz_path = Path(args.modefine_npz) if args.modefine_npz else default_finetuned_npz_path(args)

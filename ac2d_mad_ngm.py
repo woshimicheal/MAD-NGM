@@ -177,6 +177,7 @@ def evaluate_mad_ngm(args: argparse.Namespace, parameter_path: Path) -> None:
     initial_mse = float(_mse_residual(input_define, initial_prediction))
     print(f"Initial MSE before fine-tuning: {initial_mse:.6e}")
 
+    start_time = time.perf_counter()
     latent = fine_tune_latent(
         ufun=ufun,
         y=input_define,
@@ -187,6 +188,9 @@ def evaluate_mad_ngm(args: argparse.Namespace, parameter_path: Path) -> None:
         reg_weight=args.latent_reg,
         print_every=args.finetune_print_every,
     )
+
+    elapsed_time = time.perf_counter() - start_time
+    print(f"Fine-tuning runtime: {elapsed_time / 60:.2f} min")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     fine_tuned_path = args.output_dir / f"ac2d_finetuned_latent_index{args.test_index}.npz"

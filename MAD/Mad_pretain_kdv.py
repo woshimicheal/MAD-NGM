@@ -54,7 +54,7 @@ class MadNN():
         self.optimizer = torch.optim.LBFGS(self.net.parameters(),lr=1.0, max_iter=maxiter, max_eval=None, tolerance_grad=1e-30, tolerance_change=1e-30, history_size=500, line_search_fn=None)
         # self.optimizer = torch.optim.Adam(
         # self.net.parameters(),
-        # lr=1e-2 # 可根据需要调整
+        # lr=1e-2 
         # )
         self.mse_loss = torch.nn.MSELoss()
         self.losslist=[]
