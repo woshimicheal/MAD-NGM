@@ -63,18 +63,6 @@ class MadNN():
         self.net = net.to(device)
 
     def Latents_pretrain(self):
-        """
-        预训练阶段初始化潜在变量和网络模型。
-
-        创建神经网络实例，初始化潜在变量(latents)为随机正态分布，
-        并将潜在变量注册为网络的可训练参数，最后将网络移至计算设备。
-
-        Args:
-            无
-
-        Returns:
-            无
-        """
         net = Net(self.layers)
         latents = torch.nn.Parameter(torch.randn(self.num_latents, self.latent_size).float())
         net.register_parameter('Latents', latents)
@@ -90,8 +78,6 @@ class MadNN():
         selected_latent = self.net.Latents[index]
         u = self.net.forward(X,selected_latent).to(device)
         return u
-
-
 
     def loss_func(self):
         self.optimizer.zero_grad()
