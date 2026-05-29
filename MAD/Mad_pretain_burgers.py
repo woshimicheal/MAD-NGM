@@ -50,7 +50,7 @@ class MadNN():
         if model == 'pretrain':
             self.optimizer = torch.optim.LBFGS(self.net.parameters(),lr=0.01, max_iter=maxiter, max_eval=None, tolerance_grad=1e-30, tolerance_change=1e-30, history_size=10, line_search_fn=None)
         else:
-            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=1e-2)            
+            self.optimizer = torch.optim.Adam(self.net.parameters(), lr=1e-3)            
         self.mse_loss = torch.nn.MSELoss()
         self.losslist=[]
         self.iter = 0
