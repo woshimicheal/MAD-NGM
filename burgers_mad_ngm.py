@@ -101,10 +101,10 @@ def default_finetuned_npz_path(args: argparse.Namespace) -> Path:
 
 def default_evolution_path(args: argparse.Namespace) -> Path:
     return args.output_dir / (
-        f"Burgers_time_evolution_{args.method_name}_index{args.test_index}_"
-        f"h{args.hidden_dim}_z{args.latent_dim}_n{args.num_latents}.npz"
+        f"Burgers_time_evolution_{args.method_name}_{args.time_integrator}_"
+        f"index{args.test_index}_h{args.hidden_dim}_"
+        f"z{args.latent_dim}_n{args.num_latents}.npz"
     )
-
 
 def reset_solve_ivp_monitor() -> None:
     for name in ("last_log_time", "total_time"):
@@ -259,7 +259,7 @@ def modefine_mad_ngm(
     while mad.iter < args.modefine_iterations:
         loss = mad.train()  
     elapsed_time = time.perf_counter() - start_time
-    print(f"Fine-tuning runtime: {elapsed_time / 60:.2f} min")
+    print(f"elapsed={elapsed_time / 60:.2f} min")
 
     model_path = Path(args.modefine_model) if args.modefine_model else default_finetuned_model_path(args)
     npz_path = Path(args.modefine_npz) if args.modefine_npz else default_finetuned_npz_path(args)
@@ -284,10 +284,59 @@ def build_burgers_ops(args: argparse.Namespace):
         problem.Omega,
         args.latent_dim,
     )
-    ops = OpsBurgers(problem, dnn, args.time_integrator, "NGLM")
+    ops = OpsBurgers(problem, dnn, "RK45", "NGLM")
     return problem, dnn, ops
 
+def modified_euler_solver(rhsfun, y0, t_eval, show_progress=False):
+    y = jnp.asarray(y0)
+    sol = [np.array(y0)]
 
+    num_steps = len(t_eval) - 1
+
+    for i in range(num_steps):
+        t = float(t_eval[i])
+        dt = float(t_eval[i + 1] - t_eval[i])
+
+        k1 = rhsfun(t, y)
+        y_pred = y + dt * k1
+        k2 = rhsfun(t + dt, y_pred)
+
+        y = y + dt / 2.0 * (k1 + k2)
+        y = jax.block_until_ready(y)
+
+        sol.append(np.array(y))
+
+        if show_progress and i % 10 == 0:
+            print(f"Modified Euler step {i}/{num_steps}")
+
+    return np.array(sol).T
+
+
+def rk4_solver(rhsfun, y0, t_eval, show_progress=False):
+    y = jnp.asarray(y0)
+    sol = [np.array(y0)]
+
+    num_steps = len(t_eval) - 1
+
+    for i in range(num_steps):
+        t = float(t_eval[i])
+        dt = float(t_eval[i + 1] - t_eval[i])
+
+        k1 = rhsfun(t, y)
+        k2 = rhsfun(t + dt / 2.0, y + dt * k1 / 2.0)
+        k3 = rhsfun(t + dt / 2.0, y + dt * k2 / 2.0)
+        k4 = rhsfun(t + dt, y + dt * k3)
+
+        y = y + dt / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        y = jax.block_until_ready(y)
+
+        sol.append(np.array(y))
+
+        if show_progress and i % 10 == 0:
+            print(f"RK4 step {i}/{num_steps}")
+
+    return np.array(sol).T
+    
 def evolve_mad_ngm(args: argparse.Namespace, modefine_npz_path: Path) -> Path:
     os.environ.setdefault("JAX_TRACEBACK_FILTERING", "off")
 
@@ -322,33 +371,60 @@ def evolve_mad_ngm(args: argparse.Namespace, modefine_npz_path: Path) -> Path:
     t_eval = args.max_step * store_indices
 
     print("Warming up JAX compilation...")
-    warmup_out = rhs_fun(t_eval[0], init_az)
+    warmup_out = rhs_fun(float(t_eval[0]), init_az)
     jax.block_until_ready(warmup_out)
     print("Warm-up finished.")
 
-    reset_solve_ivp_monitor() 
-    monitor_ivp_progress.total_time = float(t_eval[-1] - t_eval[0])
-
     print(f"Start time evolution with {args.time_integrator}...")
     start_time = time.perf_counter()
-    solution = integrate.solve_ivp(
-        rhs_fun,
-        [float(t_eval[0]), float(t_eval[-1])],
-        np.asarray(init_az),
-        method=args.time_integrator,
-        t_eval=np.asarray(t_eval),
-        jac=None,
-        max_step=args.max_step,
-        events=(lambda t, y: monitor_ivp_progress(t, y) or 0) if args.show_progress else None,
-    )
-    jax.block_until_ready(jnp.asarray(solution.y))
+    
+    if args.time_integrator == "RK45":
+        reset_solve_ivp_monitor()
+        monitor_ivp_progress.total_time = float(t_eval[-1] - t_eval[0])
+    
+        solution = integrate.solve_ivp(
+            rhs_fun,
+            [float(t_eval[0]), float(t_eval[-1])],
+            np.asarray(init_az),
+            method="RK45",
+            t_eval=np.asarray(t_eval),
+            jac=None,
+            max_step=args.max_step,
+            events=(lambda t, y: monitor_ivp_progress(t, y) or 0) if args.show_progress else None,
+        )
+    
+        solution_y = solution.y
+    
+    elif args.time_integrator == "modified_euler":
+        solution_y = modified_euler_solver(
+            rhs_fun,
+            init_az,
+            np.asarray(t_eval),
+            show_progress=args.show_progress,
+        )
+    
+    elif args.time_integrator == "RK4":
+        solution_y = rk4_solver(
+            rhs_fun,
+            init_az,
+            np.asarray(t_eval),
+            show_progress=args.show_progress,
+        )
+    
+    else:
+        raise ValueError(
+            f"Unknown time_integrator: {args.time_integrator}. "
+            "Please choose 'RK45', 'modified_euler', or 'RK4'."
+        )
+    
+    jax.block_until_ready(jnp.asarray(solution_y))
     elapsed_time = time.perf_counter() - start_time
 
     print(f"Time-evolution runtime: {elapsed_time:.2f} seconds")
     print(f"Time-evolution runtime: {elapsed_time / 60:.2f} minutes")
-
+    
     evolution_path = Path(args.evolution_npz) if args.evolution_npz else default_evolution_path(args)
-    jnp.savez(evolution_path, Lantent=latent_jax, az=solution.y)
+    jnp.savez(evolution_path, Lantent=latent_jax, az=solution_y)
     print(f"Saved time-evolution results to {evolution_path}")
 
     return evolution_path
@@ -393,7 +469,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--test_index", type=int, default=11)
     parser.add_argument("--delta", type=float, default=0.0) 
 
-    parser.add_argument("--time_integrator", type=str, default="RK45")
+    parser.add_argument("--time_integrator", type=str, default="RK45", choices=["RK45", "modified_euler", "RK4"], help="Time integrator used in the time-evolution stage.",)
     parser.add_argument("--max_step", type=float, default=1e-3)
     parser.add_argument("--num_time_steps", type=int, default=1000)
     parser.add_argument("--method_name", type=str, default="NGM")
