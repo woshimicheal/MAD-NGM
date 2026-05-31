@@ -93,7 +93,7 @@ class MadNN():
     def loss_func_Helper(self,index=None):
         u_pred = self.net_u(index)
         uo_ii  = self.u0Mat[index].unsqueeze(-1).float().to(device)  
-        loss1 = torch.mean((uo_ii- u_pred) ** 2)
+        loss1 = torch.sum((uo_ii- u_pred) ** 2)
         return loss1
 
     def loss_func(self):
